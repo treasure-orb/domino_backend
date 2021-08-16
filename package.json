@@ -1,0 +1,45 @@
+{
+  "scripts": {
+    "dev": "nodemon --exec babel-node src/index.js",
+    "build": "rm -rf dist && babel src --out-dir dist",
+    "start": "pm2 start dist/index.js",
+    "lint": "eslint src"
+  },
+  "author": "",
+  "license": "",
+  "devDependencies": {
+    "babel-cli": "^6.9.0",
+    "babel-preset-es2015": "^6.9.0",
+    "eslint": "^2.11.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.8.1",
+    "eslint-plugin-jsx-a11y": "^1.3.0",
+    "eslint-plugin-react": "^5.1.1",
+    "nodemon": "^1.9.2"
+  },
+  "dependencies": {
+    "babel-node": "0.0.1-security",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.15.1",
+    "compression": "^1.6.2",
+    "cors": "^2.7.1",
+    "delete": "^1.1.0",
+    "express": "^4.13.4",
+    "jwt-simple": "^0.5.0",
+    "mongodb-autoincrement": "^1.0.1",
+    "mongoose": "^4.4.16",
+    "mongoose-validator": "^2.1.0",
+    "morgan": "^1.7.0",
+    "multer": "^1.4.2",
+    "nodemailer": "^2.4.2",
+    "npm": "^6.14.9",
+    "passport": "^0.3.2",
+    "passport-jwt": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "path": "^0.12.7",
+    "socket-io": "^1.0.0",
+    "socket.io": "^3.0.3",
+    "uuid": "^8.3.1",
+    "uuidv4": "^6.2.5"
+  }
+}
