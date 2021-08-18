@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import compression from 'compression';
 import router from './router';
+const SocketConnection = require('./socket');
+const  SOCKERT_PORT  = process.env.PORT || 3030;
 
 const app = express();
 var http = require('http').createServer(app);
@@ -29,3 +31,15 @@ const port = process.env.PORT || 3300;
 
 http.listen(port);
 console.log('server listening on:', port);
+
+const socketServer = app.listen(SOCKERT_PORT, () => {
+  console.log(`Sockert Server is running on port ${SOCKERT_PORT}.`);
+})
+const socketio = require('socket.io')(socketServer, {
+  cors: {
+    origin: '*'
+  },
+  credentials: true
+});
+
+SocketConnection(app, socketio);
