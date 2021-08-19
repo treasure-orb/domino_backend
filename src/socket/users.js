@@ -5,6 +5,7 @@ const addUser = ({ id, email}) => {
   const existingUser = users.find((user) => user.email === email);
 
   if(!email) return { error: 'Username and room are required.' };
+  
   if(existingUser) return { error: 'Email is taken.' };
 
   const user = { id, email };
