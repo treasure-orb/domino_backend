@@ -1,5 +1,5 @@
 const { addUser, removeUser,getAllUsers } = require('./users');
-const { addRoom, removeRoom, getAllRooms, addPlayerInRoom, getRoomByEmail} = require('./rooms');
+const { addRoom, removeRoom, getAllRooms, addPlayerInRoom,addPlayerIdinRoom, getRoomByEmail, disconnectPlayerInGameRoom} = require('./rooms');
 const { addMessageUser, addMessage, getUserMessages} = require('./message');
 const { addRoomCards, randomRoomCards } = require('./cards');
 const connection = (app, io) => {
@@ -17,8 +17,19 @@ const connection = (app, io) => {
         io.to('Player-List').emit('showUsers', users);
         io.to('Player-List').emit('showRooms', rooms);  
       });
+      //handle when player disconnect
+      socket.on('disconnect', () => {
+        const {roomEmail, userPosition} = disconnectPlayerInGameRoom(socket.id);
+        if(userPosition) {
+          console.log(roomEmail, userPosition);
+          io.to('playing-room: '+ roomEmail).emit('onePlayerOffline', {playerPosition: userPosition});
+        }
+        removeUser(socket.id);
+        const users = getAllUsers();
+        io.to('Player-List').emit('showUsers', users);
+      });
       //handle for creating gameroom
-      socket.on('createRoom', ({ roomEmail, createPlayerEmail }, callback)=>{
+      socket.on('createRoom', ({ roomEmail, createPlayerEmail}, callback)=>{
         const {err, room} = addRoom({roomEmail, createPlayerEmail}, callback);
         if(err) return callback(err);
         socket.join('room: ' + roomEmail);
@@ -32,12 +43,10 @@ const connection = (app, io) => {
         const rooms = getAllRooms();
         io.to('Player-List').emit('showRooms', rooms);
       })
-      //handle when player disconnect
-      socket.on('disconnect', () => {
-        removeUser(socket.id);
-        const users = getAllUsers();
-        io.to('Player-List').emit('showUsers', users);
-      });
+      socket.on('playerIdRecord', ({roomEmail, playerPosition}) => {
+        addPlayerIdinRoom({roomEmail, playerPosition, playerId: socket.id});
+      })
+      
       //handle for adding the player to the gameroom
       socket.on('joinPlayerInRoom', ({roomIndex, playerEmail}, callback)=>{
         const {err,room} = addPlayerInRoom({roomIndex, playerEmail});        
@@ -70,8 +79,9 @@ const connection = (app, io) => {
       //handle when player click 'Start' button
       socket.on('startBtnClick', ({roomEmail}) => {
         const room = getRoomByEmail(roomEmail);
-        room.players.map((playerEmail, index) => {
-          io.to('PlayerEmail: '+playerEmail).emit('setPosition', {position: index+1});
+        room.players.map((player, index) => {
+          io.to('PlayerEmail: '+player.email).emit('setPosition', {position: index+1});
+          player.online = true;
         })
         io.to('room: '+roomEmail).emit('startGame', roomEmail );
       })
@@ -87,8 +97,8 @@ const connection = (app, io) => {
         io.to('playing-room: '+ roomemail).emit('apply-gamecards', {playerCards});
       })
 
-      socket.on('selectCard', ({cardNumber, roomEmail})=> {
-        io.to('playing-room: '+ roomEmail).emit('throwCard', {cardNumber});
+      socket.on('cardClick', ({cardIndex, hoverNumber,pos, roomEmail}) => {
+        io.to('playing-room: '+ roomEmail).emit('playersCardClick', {cardIndex, hoverNumber, pos});
       })
       
     })    

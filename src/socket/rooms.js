@@ -12,7 +12,7 @@ const addRoom = ({roomEmail, createPlayerEmail}, callback) => {
     })
   })
   if(isAlreadyJoinToRoom) return {err: "You have already joined to the room. You can't create the new room!"}
-  const room = { roomEmail, players: [createPlayerEmail]};
+  const room = { roomEmail, players: [{email: createPlayerEmail}]};
 
   rooms.push(room);
 
@@ -34,8 +34,8 @@ const addPlayerInRoom = ({roomIndex,playerEmail}) => {
   var playerRoom;
   var isAlreadyJoinToRoom = false;
   rooms.map((room, index)=>{
-    room.players.map((Email)=>{
-      if(Email == playerEmail&&index!=roomIndex) {
+    room.players.map((player)=>{
+      if(player.email == playerEmail&&index!=roomIndex) {
         isAlreadyJoinToRoom = true;
       }
     })
@@ -44,22 +44,45 @@ const addPlayerInRoom = ({roomIndex,playerEmail}) => {
   rooms.map((room, index)=>{
     if(index == roomIndex) {
       playerRoom = room;
-      var i = room.players.findIndex((email)=> email === playerEmail);
+      var i = room.players.findIndex((player)=> player.email === playerEmail);
       if(i === -1) {
-        room.players.push(playerEmail);
+        room.players.push({email: playerEmail});
       }
     }
   })
   return {room:playerRoom};
 }
+
+const addPlayerIdinRoom = ({roomEmail, playerPosition, playerId}) => {
+  var index = rooms.findIndex((room) => room.roomEmail == roomEmail);
+  console.log(index);
+  if(index !== -1) {
+    rooms[index].players[playerPosition].id = playerId;
+    console.log(playerId);
+  }
+}
 const getRoomByEmail = (roomEmail) => {
   var playerRoom;
   rooms.map((room)=>{
     if(room.roomEmail == roomEmail) {
-      console.log(room)
       playerRoom = room;
     }
   })
   return playerRoom;
 }
-module.exports = { addRoom, removeRoom, getAllRooms, addPlayerInRoom, getRoomByEmail};
+
+const disconnectPlayerInGameRoom = (userId) => {
+  var gameRoom;
+  var playerPosition;
+  rooms.map((room) => {
+    var index = room.players.findIndex((player) => player.id == userId)
+    if(index !== -1) {
+      gameRoom = room;
+      playerPosition = index + 1;
+      room.players[index].online = false;
+    }
+  })
+  if(playerPosition) return {roomEmail: gameRoom.roomEmail, userPosition: playerPosition};
+  else return {roomEmail: null, userPosition: null}
+}
+module.exports = { addRoom, removeRoom, getAllRooms, addPlayerInRoom,addPlayerIdinRoom,  getRoomByEmail, disconnectPlayerInGameRoom};
